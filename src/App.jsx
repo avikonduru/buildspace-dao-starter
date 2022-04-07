@@ -14,7 +14,9 @@ const App = () => {
   const editionDrop = useEditionDrop("0x89A57Ed9142A02247D145409529F1c17EA331759");
   // Initialize our token contract
   const token = useToken("0x255A1ffEc06321b11397A4aA7B6eC584db5a9c92")
+  // Initialize our vote contract
   const vote = useVote("0x844bD5139CB8688275517214C52dff0ce4b9aa9F");
+
   // State variable for us to know if user has our NFT.
   const [hasClaimedNFT, setHasClaimedNFT] = useState(false);
   // isClaiming lets us easily keep a loading state while the NFT is minting.
@@ -66,7 +68,7 @@ const App = () => {
 
     const checkIfUserHasVoted = async () => {
       try {
-        const hasVoted = await vote.hasVoted(proposals[0].proposalId, address);
+        const hasVoted = await vote.hasVoted(proposals[0].proposalId);
         setHasVoted(hasVoted);
         if (hasVoted) {
           console.log("🥵 User has already voted");
@@ -173,6 +175,19 @@ const App = () => {
     }
   };
 
+  // This is the case where the user hasn't connected their wallet
+  // to your web app. Let them call connectWallet.
+  if (!address) {
+    return (
+      <div className="landing">
+        <h1>Welcome to NarutoDAO</h1>
+        <button onClick={connectWithMetamask} className="btn-hero">
+          Connect your wallet
+        </button>
+      </div>
+    );
+  }
+
   if (network?.[0].data.chain.id !== ChainId.Rinkeby) {
     return (
       <div className="unsupported-network">
@@ -181,19 +196,6 @@ const App = () => {
           This dapp only works on the Rinkeby network, please switch networks
           in your connected wallet.
         </p>
-      </div>
-    );
-  }
-
-  // This is the case where the user hasn't connected their wallet
-  // to your web app. Let them call connectWallet.
-  if (!address) {
-    return (
-      <div className="landing">
-        <h1>Welcome to ChairmanDAO</h1>
-        <button onClick={connectWithMetamask} className="btn-hero">
-          Connect your wallet
-        </button>
       </div>
     );
   }
